@@ -36,19 +36,28 @@ class EmbeddingEngine:
             if not openai_api_key:
                 raise ValueError("OpenAI API key is required for OpenAI models")
             
-            return OpenAIEmbeddings(
-                model=model_name,
-                openai_api_key=openai_api_key
-            )
+            try:
+                from langchain_openai import OpenAIEmbeddings
+                return OpenAIEmbeddings(
+                    model=model_name,
+                    openai_api_key=openai_api_key
+                )
+            except ImportError:
+                raise ImportError("langchain_openai package is required for OpenAI models")
         else:
             # Use HuggingFace model
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-            return HuggingFaceEmbeddings(
-                model_name=model_name,
-                model_kwargs={"device": device},
-                encode_kwargs={"normalize_embeddings": True}
-            )
-    
+            try:
+                from langchain_huggingface import HuggingFaceEmbeddings
+                import torch
+                
+                device = "cuda" if torch.cuda.is_available() else "cpu"
+                return HuggingFaceEmbeddings(
+                    model_name=model_name,
+                    model_kwargs={"device": device},
+                    encode_kwargs={"normalize_embeddings": True}
+                )
+            except ImportError:
+                raise ImportError("langchain_huggingface package is required for Hugging Face models. Please install with: pip install langchain-huggingface")
     def embed_text(self, text: str) -> List[float]:
         """
         Convert a single text string into an embedding vector.
