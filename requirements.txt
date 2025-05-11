@@ -10,3 +10,5 @@ torch>=2.7.0
 transformers>=4.51.3
 openai>=1.78.0
 python-dotenv>=1.1.0
+streamlit>=1.22.0
+watchdog  # For auto-reloading in Streamlit
