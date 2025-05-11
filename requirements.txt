@@ -13,3 +13,5 @@ openai>=1.78.0
 python-dotenv>=1.1.0
 streamlit>=1.22.0
 watchdog  # For auto-reloading in Streamlit
+accelerate>=0.35.0   # Add this line
+bitsandbytes>=0.43.0  # Add this for quantization support

@@ -61,14 +61,31 @@ class LLMProcessor:
         
         print(f"Loading local model: {model_id}...")
         
-        # Initialize tokenizer and model
+        # Initialize tokenizer
         tokenizer = AutoTokenizer.from_pretrained(model_id)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_id,
-            torch_dtype=torch.float16,
-            low_cpu_mem_usage=True,
-            device_map="auto"
-        )
+        
+        # Try with accelerate/device_map first, fall back to CPU if that fails
+        try:
+            # Check for GPU availability
+            if torch.cuda.is_available():
+                # Try with accelerate and device_map
+                model = AutoModelForCausalLM.from_pretrained(
+                    model_id,
+                    torch_dtype=torch.float16,
+                    low_cpu_mem_usage=True,
+                    device_map="auto"
+                )
+            else:
+                # CPU-only mode
+                model = AutoModelForCausalLM.from_pretrained(
+                    model_id,
+                    low_cpu_mem_usage=True,
+                )
+        except Exception as e:
+            print(f"Error loading model with advanced settings: {e}")
+            print("Falling back to basic model loading...")
+            # Most basic loading - should work everywhere but slow
+            model = AutoModelForCausalLM.from_pretrained(model_id)
         
         # Create text generation pipeline
         pipe = pipeline(
